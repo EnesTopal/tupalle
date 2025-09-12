@@ -27,6 +27,9 @@ public class Share {
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    @Column(nullable = false, length = 200)
+    private String title;
+
     @Column(length = 2000)
     private String description;
 

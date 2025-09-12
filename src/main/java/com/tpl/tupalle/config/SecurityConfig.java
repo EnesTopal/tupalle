@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,6 +22,12 @@ import java.util.List;
 @EnableMethodSecurity // @PreAuthorize için
 public class SecurityConfig {
 
+    private final SessionAuthenticationFilter sessionAuthenticationFilter;
+
+    public SecurityConfig(SessionAuthenticationFilter sessionAuthenticationFilter) {
+        this.sessionAuthenticationFilter = sessionAuthenticationFilter;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -30,11 +37,12 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // stateful
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/auth/login").permitAll()
+                        .requestMatchers("/actuator/health", "/auth/login", "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(sessionAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(login -> login.disable()) // kendi /auth/login endpoint'imizi kullanacağız
                 .httpBasic(basic -> basic.disable());
 

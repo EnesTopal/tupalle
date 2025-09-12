@@ -7,8 +7,10 @@ import java.util.List;
 public record ShareResponse(
         String id,
         String ownerUsername,
+        String title,
         String description,
         List<String> imageUrls,
         List<CodeSnippet> codeSnippets,
-        long likeCount
+        long likeCount,
+        boolean isLiked
 ) {}

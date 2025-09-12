@@ -1,6 +1,5 @@
 package com.tpl.tupalle.entity;
 
-import com.tpl.tupalle.entity.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 

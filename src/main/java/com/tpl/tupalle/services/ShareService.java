@@ -40,6 +40,7 @@ public class ShareService {
 
         Share s = new Share();
         s.setOwner(owner);
+        s.setTitle(req.title());
         s.setDescription(req.description());
         s.setImageUrls(req.imageUrls() != null ? req.imageUrls() : java.util.Collections.emptyList());
         s.setCodeSnippets(req.codeSnippets() != null ? req.codeSnippets() : java.util.Collections.emptyList());
@@ -88,14 +89,58 @@ public class ShareService {
         return shareRepo.findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Page<Share> listMostLiked(Pageable pageable) {
+        return shareRepo.findAllByOrderByLikeCountDesc(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Share> listRecent(Pageable pageable) {
+        return shareRepo.findAllByOrderByCreatedAtDesc(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Share> searchByTitle(String title, Pageable pageable) {
+        return shareRepo.findByTitleContainingIgnoreCase(title, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Share> getUserShares(String username, Pageable pageable) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return shareRepo.findAllByOwnerId(user.getId(), pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasUserLiked(UUID shareId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return likeRepo.existsByShareIdAndUserId(shareId, user.getId());
+    }
+
     public static ShareResponse toDto(Share share) {
         return new ShareResponse(
                 share.getId().toString(),
                 share.getOwner().getUsername(),
+                share.getTitle(),
                 share.getDescription(),
                 share.getImageUrls(),
                 share.getCodeSnippets(),
-                share.getLikeCount()
+                share.getLikeCount(),
+                false // Default to false, will be set by controller
+        );
+    }
+
+    public static ShareResponse toDto(Share share, boolean isLiked) {
+        return new ShareResponse(
+                share.getId().toString(),
+                share.getOwner().getUsername(),
+                share.getTitle(),
+                share.getDescription(),
+                share.getImageUrls(),
+                share.getCodeSnippets(),
+                share.getLikeCount(),
+                isLiked
         );
     }
 }
