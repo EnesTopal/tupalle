@@ -1,0 +1,101 @@
+package com.tpl.tupalle.services;
+
+import com.tpl.tupalle.entity.DTO.CreateShareDTO;
+import com.tpl.tupalle.entity.DTO.ShareResponse;
+import com.tpl.tupalle.entity.Share;
+import com.tpl.tupalle.entity.ShareLike;
+import com.tpl.tupalle.repositories.ShareLikeRepository;
+import com.tpl.tupalle.repositories.ShareRepository;
+import com.tpl.tupalle.entity.User;
+import com.tpl.tupalle.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+@Service
+public class ShareService {
+
+    private final ShareRepository shareRepo;
+    private final ShareLikeRepository likeRepo;
+    private final UserRepository userRepository;
+
+    public ShareService(ShareRepository shareRepo, ShareLikeRepository likeRepo, UserRepository userRepository) {
+        this.shareRepo = shareRepo;
+        this.likeRepo = likeRepo;
+        this.userRepository = userRepository;
+    }
+
+    @Transactional
+    public Share createShare(String ownerUsername, CreateShareDTO req) {
+        User owner = userRepository.findByUsername(ownerUsername)
+                .orElseThrow(() -> new EntityNotFoundException("Owner not found"));
+
+        if (owner == null) {
+            throw new EntityNotFoundException("Owner not found");
+        }
+
+        Share s = new Share();
+        s.setOwner(owner);
+        s.setDescription(req.description());
+        s.setImageUrls(req.imageUrls() != null ? req.imageUrls() : java.util.Collections.emptyList());
+        s.setCodeSnippets(req.codeSnippets() != null ? req.codeSnippets() : java.util.Collections.emptyList());
+
+        return shareRepo.save(s);
+    }
+
+    @Transactional
+    public void likeShare(UUID shareId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Share share = shareRepo.findById(shareId)
+                .orElseThrow(() -> new EntityNotFoundException("Share not found"));
+
+        if (likeRepo.existsByShareIdAndUserId(shareId, user.getId())) return; // idempotent
+
+        ShareLike like = new ShareLike();
+        like.setShare(share);
+        like.setUser(user);
+        likeRepo.save(like);
+
+        share.setLikeCount(share.getLikeCount() + 1);
+    }
+
+    @Transactional
+    public void unlikeShare(UUID shareId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Share share = shareRepo.findById(shareId)
+                .orElseThrow(() -> new EntityNotFoundException("Share not found"));
+
+        likeRepo.findByShareIdAndUserId(shareId, user.getId()).ifPresent(l -> {
+            likeRepo.delete(l);
+            share.setLikeCount(Math.max(0, share.getLikeCount() - 1));
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public Share getShare(UUID id) {
+        return shareRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Share not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Share> list(Pageable pageable) {
+        return shareRepo.findAll(pageable);
+    }
+
+    public static ShareResponse toDto(Share share) {
+        return new ShareResponse(
+                share.getId().toString(),
+                share.getOwner().getUsername(),
+                share.getDescription(),
+                share.getImageUrls(),
+                share.getCodeSnippets(),
+                share.getLikeCount()
+        );
+    }
+}
