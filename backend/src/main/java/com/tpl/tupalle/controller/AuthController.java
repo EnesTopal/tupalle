@@ -10,10 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.FieldError;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -27,24 +24,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        // Additional validation
-        if (request.username().length() < 3) {
-            return ResponseEntity.badRequest()
-                    .body(new AuthResponse(null, "Username must be at least 3 characters long", false));
-        }
-        if (request.username().length() > 50) {
-            return ResponseEntity.badRequest()
-                    .body(new AuthResponse(null, "Username must be less than 50 characters", false));
-        }
-        if (request.password().length() < 6) {
-            return ResponseEntity.badRequest()
-                    .body(new AuthResponse(null, "Password must be at least 6 characters long", false));
-        }
-        if (request.password().length() > 100) {
-            return ResponseEntity.badRequest()
-                    .body(new AuthResponse(null, "Password must be less than 100 characters", false));
-        }
-        
         AuthResponse response = authService.register(request);
         if (response.success()) {
             return ResponseEntity.ok(response);
