@@ -25,6 +25,14 @@ public class UserController {
                 .map(ShareService::toDto);
     }
 
+    @GetMapping("/me/liked")
+    public Page<ShareResponse> getMyLikedShares(Authentication auth,
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "20") int size) {
+        return shareService.getUserLikedShares(auth.getName(), PageRequest.of(page, size))
+                .map(share -> ShareService.toDto(share, true)); // Always true since these are liked shares
+    }
+
     @GetMapping("/{username}/shares")
     public Page<ShareResponse> getUserShares(@PathVariable String username,
                                              @RequestParam(defaultValue = "0") int page,

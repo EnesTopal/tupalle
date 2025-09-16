@@ -94,6 +94,9 @@ export const userApi = {
   getMyShares: (page = 0, size = 20): Promise<ApiResponse<Share>> =>
     api.get(`/users/me/shares?page=${page}&size=${size}`).then(res => res.data),
   
+  getMyLikedShares: (page = 0, size = 20): Promise<ApiResponse<Share>> =>
+    api.get(`/users/me/liked?page=${page}&size=${size}`).then(res => res.data),
+  
   getUserShares: (username: string, page = 0, size = 20): Promise<ApiResponse<Share>> =>
     api.get(`/users/${username}/shares?page=${page}&size=${size}`).then(res => res.data),
 };

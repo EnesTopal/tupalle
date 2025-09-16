@@ -118,6 +118,13 @@ public class ShareService {
         return likeRepo.existsByShareIdAndUserId(shareId, user.getId());
     }
 
+    @Transactional(readOnly = true)
+    public Page<Share> getUserLikedShares(String username, Pageable pageable) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return likeRepo.findLikedSharesByUserIdExcludingOwnShares(user.getId(), pageable);
+    }
+
     public static ShareResponse toDto(Share share) {
         return new ShareResponse(
                 share.getId().toString(),

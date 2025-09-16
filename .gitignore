@@ -5,6 +5,15 @@ target/
 !**/src/test/**/target/
 README-SETUP.md
 
+### Node.js ###
+frontend/node_modules/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.npm
+frontend/.eslintcache
+frontend/build/
+
 ### STS ###
 .apt_generated
 .classpath

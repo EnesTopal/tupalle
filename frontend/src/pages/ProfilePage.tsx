@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'my-shares' | 'liked'>('my-shares');
   const [myShares, setMyShares] = useState<Share[]>([]);
+  const [likedShares, setLikedShares] = useState<Share[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -28,9 +29,25 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const loadLikedShares = async (page = 0) => {
+    setLoading(true);
+    try {
+      const response = await userApi.getMyLikedShares(page, 20);
+      setLikedShares(response.content);
+      setTotalPages(response.totalPages);
+      setCurrentPage(response.number);
+    } catch (error) {
+      console.error('Failed to load liked shares:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'my-shares') {
       loadMyShares();
+    } else if (activeTab === 'liked') {
+      loadLikedShares();
     }
   }, [activeTab]);
 
@@ -185,11 +202,76 @@ const ProfilePage: React.FC = () => {
             {activeTab === 'liked' && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">Liked Shares</h3>
-                <div className="text-center py-12">
-                  <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg">No liked shares yet</p>
-                  <p className="text-gray-400 mt-2">Like some shares to see them here!</p>
-                </div>
+                
+                {loading ? (
+                  <div className="flex justify-center items-center h-32">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {likedShares.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 text-lg">No liked shares yet</p>
+                        <p className="text-gray-400 mt-2">Like some shares to see them here!</p>
+                      </div>
+                    ) : (
+                      likedShares.map((share) => (
+                        <div key={share.id} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <Link to={`/shares/${share.id}`}>
+                                <h4 className="text-lg font-semibold text-gray-900 hover:text-primary-600 cursor-pointer">
+                                  {share.title}
+                                </h4>
+                              </Link>
+                              <p className="text-sm text-gray-600">
+                                by {share.ownerUsername} • {share.likeCount} likes
+                              </p>
+                            </div>
+                            <Heart className="h-5 w-5 text-red-500 fill-current" />
+                          </div>
+                          
+                          {share.description && (
+                            <p className="text-gray-700 mb-3">{share.description}</p>
+                          )}
+
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Code className="h-4 w-4 mr-1" />
+                            {share.codeSnippets.length} code snippet{share.codeSnippets.length !== 1 ? 's' : ''}
+                            {share.imageUrls.length > 0 && (
+                              <>
+                                <span className="mx-2">•</span>
+                                <span>{share.imageUrls.length} image{share.imageUrls.length !== 1 ? 's' : ''}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Pagination for liked shares */}
+                {totalPages > 1 && activeTab === 'liked' && (
+                  <div className="mt-6 flex justify-center">
+                    <div className="flex gap-2">
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => loadLikedShares(i)}
+                          className={`px-3 py-2 rounded-lg ${
+                            currentPage === i
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
