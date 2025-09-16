@@ -3,11 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { shareApi } from '../services/api';
 import { Share } from '../types';
-import { Heart, User, LogOut, ArrowLeft } from 'lucide-react';
+import { Heart, User, LogOut, ArrowLeft, FileText } from 'lucide-react';
 
 const ShareDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [share, setShare] = useState<Share | null>(null);
+  const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -207,23 +208,41 @@ const ShareDetailPage: React.FC = () => {
 
           {share.codeSnippets.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Code Snippets</h2>
-              <div className="space-y-4">
-                {share.codeSnippets.map((snippet, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
-                      <span className="font-medium text-gray-700">
-                        {snippet.filename || `${snippet.language} Code`}
-                      </span>
-                      <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                        {snippet.language}
-                      </span>
-                    </div>
-                    <pre className="bg-gray-900 text-gray-100 p-4 overflow-x-auto">
-                      <code>{snippet.content}</code>
-                    </pre>
-                  </div>
-                ))}
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Code Files</h2>
+              
+              {/* File Selection Tabs */}
+              {share.codeSnippets.length > 1 && (
+                <div className="flex flex-wrap gap-2 mb-4 border-b">
+                  {share.codeSnippets.map((snippet, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedFileIndex(index)}
+                      className={`px-3 py-2 text-sm border-b-2 flex items-center ${
+                        selectedFileIndex === index
+                          ? 'border-primary-500 text-primary-600'
+                          : 'border-transparent text-gray-600 hover:text-gray-800'
+                      }`}
+                    >
+                      <FileText className="h-4 w-4 mr-1" />
+                      {snippet.filename || `File ${index + 1}`}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Selected File Display */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
+                  <span className="font-medium text-gray-700">
+                    {share.codeSnippets[selectedFileIndex]?.filename || `${share.codeSnippets[selectedFileIndex]?.language} Code`}
+                  </span>
+                  <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                    {share.codeSnippets[selectedFileIndex]?.language}
+                  </span>
+                </div>
+                <pre className="bg-gray-900 text-gray-100 p-4 overflow-x-auto">
+                  <code>{share.codeSnippets[selectedFileIndex]?.content}</code>
+                </pre>
               </div>
             </div>
           )}
@@ -236,7 +255,7 @@ const ShareDetailPage: React.FC = () => {
                   <img
                     key={index}
                     src={url}
-                    alt={`Share image ${index + 1}`}
+                    alt={`Screenshot ${index + 1}`}
                     className="w-full h-auto object-cover rounded-lg shadow-sm"
                   />
                 ))}
