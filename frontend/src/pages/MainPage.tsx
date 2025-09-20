@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { shareApi } from '../services/api';
 import { Share, ApiResponse } from '../types';
-import { Search, Heart, User, LogOut } from 'lucide-react';
+import { Search, Heart, User, LogOut, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const MainPage: React.FC = () => {
@@ -81,6 +81,13 @@ const MainPage: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
+              <Link
+                to="/create"
+                className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Create Share
+              </Link>
               <Link
                 to="/profile"
                 className="flex items-center text-gray-700 hover:text-primary-600"
@@ -185,7 +192,21 @@ const MainPage: React.FC = () => {
                           {share.title}
                         </h2>
                       </Link>
-                      <p className="text-gray-600 mb-2">by {share.ownerUsername}</p>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Link 
+                          to={`/users/${share.ownerUsername}`}
+                          className="text-gray-600 hover:text-primary-600 cursor-pointer"
+                        >
+                          by {share.ownerUsername}
+                        </Link>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          share.ownerTitle === 'Code Master' ? 'text-yellow-600 bg-yellow-100' :
+                          share.ownerTitle === 'Code Enthusiast' ? 'text-blue-600 bg-blue-100' :
+                          'text-green-600 bg-green-100'
+                        }`}>
+                          {share.ownerTitle}
+                        </span>
+                      </div>
                     </div>
                     <button
                       onClick={() => handleLike(share.id, share.isLiked)}

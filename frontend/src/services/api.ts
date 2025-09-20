@@ -5,11 +5,12 @@ import {
   LoginRequest, 
   RegisterRequest, 
   AuthResponse, 
-  ApiResponse 
+  ApiResponse,
+  UserProfile
 } from '../types';
 
 // Re-export types for convenience
-export type { Share, AuthResponse, ApiResponse, CreateShareRequest, LoginRequest, RegisterRequest };
+export type { Share, AuthResponse, ApiResponse, CreateShareRequest, LoginRequest, RegisterRequest, UserProfile };
 
 const API_BASE_URL = 'http://localhost:8080';
 // const API_BASE_URL = 'https://vjxd31fv-8080.euw.devtunnels.ms';
@@ -105,7 +106,10 @@ export const userApi = {
     api.get(`/users/me/liked?page=${page}&size=${size}`).then(res => res.data),
   
   getUserShares: (username: string, page = 0, size = 20): Promise<ApiResponse<Share>> =>
-    api.get(`/users/${username}/shares?page=${page}&size=${size}`).then(res => res.data),
+    api.get(`/api/users/${username}/shares?page=${page}&size=${size}`).then(res => res.data),
+  
+  getUserProfile: (username: string): Promise<UserProfile> =>
+    api.get(`/api/users/${username}/profile`).then(res => res.data),
 };
 
 export default api;

@@ -12,12 +12,20 @@ export interface CodeSnippet {
 export interface Share {
   id: string;
   ownerUsername: string;
+  ownerTitle: string;
   title: string;
   description: string;
   imageUrls: string[];
   codeSnippets: CodeSnippet[];
   likeCount: number;
   isLiked: boolean;
+}
+
+export interface UserProfile {
+  username: string;
+  title: string;
+  totalLikes: number;
+  enabled: boolean;
 }
 
 export interface CreateShareRequest {

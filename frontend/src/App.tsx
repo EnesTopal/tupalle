@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import CreateSharePage from './pages/CreateSharePage';
 import EditSharePage from './pages/EditSharePage';
 import ShareDetailPage from './pages/ShareDetailPage';
+import UserProfilePage from './pages/UserProfilePage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -87,6 +88,14 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <EditSharePage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/users/:username" 
+          element={
+            <ProtectedRoute>
+              <UserProfilePage />
             </ProtectedRoute>
           } 
         />

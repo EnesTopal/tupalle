@@ -183,7 +183,19 @@ const ShareDetailPage: React.FC = () => {
               </h1>
               <div className="flex items-center text-gray-600 mb-4">
                 <User className="h-5 w-5 mr-2" />
-                <span>by {share.ownerUsername}</span>
+                <Link 
+                  to={`/users/${share.ownerUsername}`}
+                  className="hover:text-primary-600 cursor-pointer"
+                >
+                  by {share.ownerUsername}
+                </Link>
+                <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                  share.ownerTitle === 'Code Master' ? 'text-yellow-600 bg-yellow-100' :
+                  share.ownerTitle === 'Code Enthusiast' ? 'text-blue-600 bg-blue-100' :
+                  'text-green-600 bg-green-100'
+                }`}>
+                  {share.ownerTitle}
+                </span>
               </div>
             </div>
             <button

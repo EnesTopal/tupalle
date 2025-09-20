@@ -22,11 +22,13 @@ public class ShareService {
     private final ShareRepository shareRepo;
     private final ShareLikeRepository likeRepo;
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public ShareService(ShareRepository shareRepo, ShareLikeRepository likeRepo, UserRepository userRepository) {
+    public ShareService(ShareRepository shareRepo, ShareLikeRepository likeRepo, UserRepository userRepository, UserService userService) {
         this.shareRepo = shareRepo;
         this.likeRepo = likeRepo;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Transactional
@@ -63,6 +65,9 @@ public class ShareService {
         likeRepo.save(like);
 
         share.setLikeCount(share.getLikeCount() + 1);
+        
+        // Update the share owner's title
+        userService.updateUserTitle(share.getOwner().getUsername());
     }
 
     @Transactional
@@ -75,6 +80,9 @@ public class ShareService {
         likeRepo.findByShareIdAndUserId(shareId, user.getId()).ifPresent(l -> {
             likeRepo.delete(l);
             share.setLikeCount(Math.max(0, share.getLikeCount() - 1));
+            
+            // Update the share owner's title
+            userService.updateUserTitle(share.getOwner().getUsername());
         });
     }
 
@@ -171,6 +179,7 @@ public class ShareService {
         return new ShareResponse(
                 share.getId().toString(),
                 share.getOwner().getUsername(),
+                share.getOwner().getTitle() != null ? share.getOwner().getTitle() : "Newbie Coder",
                 share.getTitle(),
                 share.getDescription(),
                 share.getImageUrls(),
@@ -184,6 +193,7 @@ public class ShareService {
         return new ShareResponse(
                 share.getId().toString(),
                 share.getOwner().getUsername(),
+                share.getOwner().getTitle() != null ? share.getOwner().getTitle() : "Newbie Coder",
                 share.getTitle(),
                 share.getDescription(),
                 share.getImageUrls(),

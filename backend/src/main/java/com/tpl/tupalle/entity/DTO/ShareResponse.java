@@ -7,6 +7,7 @@ import java.util.List;
 public record ShareResponse(
         String id,
         String ownerUsername,
+        String ownerTitle,
         String title,
         String description,
         List<String> imageUrls,

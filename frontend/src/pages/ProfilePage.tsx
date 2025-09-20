@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { userApi, shareApi } from '../services/api';
-import { Share } from '../types';
+import { Share, UserProfile } from '../types';
 import { User, Code, Heart, Edit, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -9,12 +9,27 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'my-shares' | 'liked'>('my-shares');
   const [myShares, setMyShares] = useState<Share[]>([]);
   const [likedShares, setLikedShares] = useState<Share[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const loadUserProfile = async () => {
+    if (!user) return;
+    setProfileLoading(true);
+    try {
+      const profile = await userApi.getUserProfile(user);
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Failed to load user profile:', error);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const loadMyShares = async (page = 0) => {
     setLoading(true);
@@ -63,7 +78,21 @@ const ProfilePage: React.FC = () => {
     navigate(`/shares/${shareId}/edit`);
   };
 
+  const getTitleColor = (title: string) => {
+    switch (title) {
+      case 'Code Master':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'Code Enthusiast':
+        return 'text-blue-600 bg-blue-100';
+      case 'Newbie Coder':
+        return 'text-green-600 bg-green-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
   useEffect(() => {
+    loadUserProfile();
     if (activeTab === 'my-shares') {
       loadMyShares();
     } else if (activeTab === 'liked') {
@@ -100,7 +129,23 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="ml-4">
               <h2 className="text-2xl font-bold text-gray-900">{user}</h2>
-              <p className="text-gray-600">Code Enthusiast</p>
+              {profileLoading ? (
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                </div>
+              ) : userProfile ? (
+                <div className="flex items-center space-x-4 mt-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTitleColor(userProfile.title)}`}>
+                    {userProfile.title}
+                  </span>
+                  <div className="flex items-center text-gray-600">
+                    <Heart className="h-4 w-4 mr-1 text-red-500" />
+                    <span>{userProfile.totalLikes} total likes</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-600">Code Enthusiast</p>
+              )}
             </div>
           </div>
         </div>
