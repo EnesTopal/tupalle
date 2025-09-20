@@ -12,8 +12,19 @@ import {
 // Re-export types for convenience
 export type { Share, AuthResponse, ApiResponse, CreateShareRequest, LoginRequest, RegisterRequest, UserProfile };
 
-const API_BASE_URL = 'http://localhost:8080';
-// const API_BASE_URL = 'https://vjxd31fv-8080.euw.devtunnels.ms';
+const getApiBaseUrl = () => {
+  if (process.env.NODE_ENV === 'development') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8080';
+    }
+    return 'https://vjxd31fv-8080.euw.devtunnels.ms';
+  }
+
+  return 'http://localhost:8080'; 
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,
