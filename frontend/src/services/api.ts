@@ -12,6 +12,7 @@ import {
 export type { Share, AuthResponse, ApiResponse, CreateShareRequest, LoginRequest, RegisterRequest };
 
 const API_BASE_URL = 'http://localhost:8080';
+// const API_BASE_URL = 'https://vjxd31fv-8080.euw.devtunnels.ms';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -87,6 +88,12 @@ export const shareApi = {
   
   searchShares: (query: string, page = 0, size = 20): Promise<ApiResponse<Share>> =>
     api.get(`/shares/search?q=${encodeURIComponent(query)}&page=${page}&size=${size}`).then(res => res.data),
+  
+  deleteShare: (id: string): Promise<void> =>
+    api.delete(`/shares/${id}`).then(res => res.data),
+  
+  updateShare: (id: string, data: CreateShareRequest): Promise<Share> =>
+    api.put(`/shares/${id}`, data).then(res => res.data),
 };
 
 // User endpoints

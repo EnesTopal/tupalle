@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { userApi } from '../services/api';
+import { userApi, shareApi } from '../services/api';
 import { Share } from '../types';
-import { User, Code, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { User, Code, Heart, Edit, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'my-shares' | 'liked'>('my-shares');
@@ -14,6 +14,7 @@ const ProfilePage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const loadMyShares = async (page = 0) => {
     setLoading(true);
@@ -41,6 +42,25 @@ const ProfilePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteShare = async (shareId: string) => {
+    if (window.confirm('Are you sure you want to delete this share? This action cannot be undone.')) {
+      try {
+        await shareApi.deleteShare(shareId);
+        // Reload the shares to reflect the deletion
+        if (activeTab === 'my-shares') {
+          loadMyShares(currentPage);
+        }
+      } catch (error) {
+        console.error('Failed to delete share:', error);
+        alert('Failed to delete share. Please try again.');
+      }
+    }
+  };
+
+  const handleEditShare = (shareId: string) => {
+    navigate(`/shares/${shareId}/edit`);
   };
 
   useEffect(() => {
@@ -153,6 +173,22 @@ const ProfilePage: React.FC = () => {
                               <p className="text-sm text-gray-600">
                                 {new Date().toLocaleDateString()} • {share.likeCount} likes
                               </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleEditShare(share.id)}
+                                className="p-2 text-gray-600 hover:text-primary-600 hover:bg-white rounded-lg transition-colors"
+                                title="Edit share"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteShare(share.id)}
+                                className="p-2 text-gray-600 hover:text-red-600 hover:bg-white rounded-lg transition-colors"
+                                title="Delete share"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
                             </div>
                           </div>
                           

@@ -125,6 +125,48 @@ public class ShareService {
         return likeRepo.findLikedSharesByUserIdExcludingOwnShares(user.getId(), pageable);
     }
 
+    @Transactional
+    public void deleteShare(UUID shareId, String username) {
+        Share share = shareRepo.findById(shareId)
+                .orElseThrow(() -> new EntityNotFoundException("Share not found"));
+        
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        
+        // Check if user owns the share
+        if (!share.getOwner().getId().equals(user.getId())) {
+            throw new SecurityException("You can only delete your own shares");
+        }
+        
+        // Delete associated likes first
+        likeRepo.deleteByShareId(shareId);
+        
+        // Delete the share
+        shareRepo.delete(share);
+    }
+
+    @Transactional
+    public Share updateShare(UUID shareId, String username, CreateShareDTO req) {
+        Share share = shareRepo.findById(shareId)
+                .orElseThrow(() -> new EntityNotFoundException("Share not found"));
+        
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        
+        // Check if user owns the share
+        if (!share.getOwner().getId().equals(user.getId())) {
+            throw new SecurityException("You can only update your own shares");
+        }
+        
+        // Update the share
+        share.setTitle(req.title());
+        share.setDescription(req.description());
+        share.setImageUrls(req.imageUrls() != null ? req.imageUrls() : java.util.Collections.emptyList());
+        share.setCodeSnippets(req.codeSnippets() != null ? req.codeSnippets() : java.util.Collections.emptyList());
+        
+        return shareRepo.save(share);
+    }
+
     public static ShareResponse toDto(Share share) {
         return new ShareResponse(
                 share.getId().toString(),

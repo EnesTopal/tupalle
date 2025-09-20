@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
 import ProfilePage from './pages/ProfilePage';
 import CreateSharePage from './pages/CreateSharePage';
+import EditSharePage from './pages/EditSharePage';
 import ShareDetailPage from './pages/ShareDetailPage';
 
 // Protected Route Component
@@ -78,6 +79,14 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <ShareDetailPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/shares/:id/edit" 
+          element={
+            <ProtectedRoute>
+              <EditSharePage />
             </ProtectedRoute>
           } 
         />

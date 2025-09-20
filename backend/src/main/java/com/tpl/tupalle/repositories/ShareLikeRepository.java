@@ -17,4 +17,6 @@ public interface ShareLikeRepository extends JpaRepository<ShareLike, UUID> {
     
     @Query("SELECT sl.share FROM ShareLike sl WHERE sl.user.id = :userId AND sl.share.owner.id != :userId ORDER BY sl.share.createdAt DESC")
     Page<com.tpl.tupalle.entity.Share> findLikedSharesByUserIdExcludingOwnShares(@Param("userId") Long userId, Pageable pageable);
+    
+    void deleteByShareId(UUID shareId);
 }

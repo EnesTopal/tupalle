@@ -101,4 +101,54 @@ public class ShareController {
     public void unlike(@PathVariable UUID id, Authentication auth) {
         shareService.unlikeShare(id, auth.getName());
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable UUID id, Authentication auth) {
+        try {
+            shareService.deleteShare(id, auth.getName());
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Share not found");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You can only delete your own shares");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete share: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable UUID id, 
+                                   @Valid @RequestBody CreateShareDTO req,
+                                   Authentication auth) {
+        try {
+            // Additional validation
+            if (req.title() == null || req.title().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body("Title is required");
+            }
+            if (req.title().length() > 200) {
+                return ResponseEntity.badRequest()
+                        .body("Title must be less than 200 characters");
+            }
+            if (req.description() != null && req.description().length() > 2000) {
+                return ResponseEntity.badRequest()
+                        .body("Description must be less than 2000 characters");
+            }
+            
+            var updated = shareService.updateShare(id, auth.getName(), req);
+            return ResponseEntity.ok(ShareService.toDto(updated));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Share not found");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You can only update your own shares");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update share: " + e.getMessage());
+        }
+    }
 }
