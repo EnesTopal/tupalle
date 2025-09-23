@@ -24,6 +24,7 @@ const CreateSharePage: React.FC = () => {
   }]);
   const [selectedFileId, setSelectedFileId] = useState('1');
   const [imageUrls, setImageUrls] = useState<string[]>(['']);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -65,20 +66,54 @@ const CreateSharePage: React.FC = () => {
     setCodeFiles(updatedFiles);
 
     try {
-      const shareData = {
-        title,
-        description,
-        codeSnippets: updatedFiles
+      // If we have image files, use the multipart endpoint
+      if (imageFiles.length > 0) {
+        const formData = new FormData();
+        formData.append('title', title);
+        if (description) formData.append('description', description);
+        
+        // Add image files
+        imageFiles.forEach(file => {
+          formData.append('imageFiles', file);
+        });
+        
+        // Add image URLs
+        imageUrls.filter(url => url.trim()).forEach(url => {
+          formData.append('imageUrls', url);
+        });
+        
+        // Add code snippets as JSON
+        const codeSnippets = updatedFiles
           .filter(file => file.content.trim() && file.name.trim())
           .map(file => ({
             language: file.language,
             content: file.content,
             filename: file.name
-          })),
-        imageUrls: imageUrls.filter(url => url.trim())
-      };
+          }));
+        
+        if (codeSnippets.length > 0) {
+          formData.append('codeSnippets', JSON.stringify(codeSnippets));
+        }
 
-      await shareApi.createShare(shareData);
+        await shareApi.createShareWithImages(formData);
+      } else {
+        // Use the regular JSON endpoint
+        const shareData = {
+          title,
+          description,
+          codeSnippets: updatedFiles
+            .filter(file => file.content.trim() && file.name.trim())
+            .map(file => ({
+              language: file.language,
+              content: file.content,
+              filename: file.name
+            })),
+          imageUrls: imageUrls.filter(url => url.trim())
+        };
+
+        await shareApi.createShare(shareData);
+      }
+      
       navigate('/');
     } catch (error: any) {
       console.error('Failed to create share:', error);
@@ -245,6 +280,16 @@ const CreateSharePage: React.FC = () => {
     if (imageUrls.length > 1) {
       setImageUrls(imageUrls.filter((_, i) => i !== index));
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    setImageFiles(prev => [...prev, ...imageFiles]);
+  };
+
+  const removeImageFile = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -436,41 +481,89 @@ const CreateSharePage: React.FC = () => {
 
             {/* Images Section */}
             <div>
-              <div className="flex items-center mb-3">
-                <Image className="h-5 w-5 text-gray-600 mr-2" />
-                <label className="block text-sm font-medium text-gray-700">
-                  Image URLs
-                </label>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <Image className="h-5 w-5 text-gray-600 mr-2" />
+                  <label className="block text-sm font-medium text-gray-700">
+                    Images
+                  </label>
+                </div>
               </div>
               
-              {imageUrls.map((url, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="url"
-                    value={url}
-                    onChange={(e) => updateImageUrl(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    placeholder="https://example.com/image.png"
-                  />
-                  {imageUrls.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeImageUrl(index)}
-                      className="px-3 py-2 text-red-600 hover:text-red-800"
-                    >
-                      Remove
-                    </button>
-                  )}
+              {/* File Upload */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Images
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Select multiple image files to upload to S3
+                </p>
+              </div>
+
+              {/* Uploaded Files Preview */}
+              {imageFiles.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Selected Files
+                  </label>
+                  <div className="space-y-2">
+                    {imageFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeImageFile(index)}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
               
-              <button
-                type="button"
-                onClick={addImageUrl}
-                className="text-primary-600 hover:text-primary-700 text-sm"
-              >
-                + Add another image URL
-              </button>
+              {/* Image URLs */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URLs
+                </label>
+                {imageUrls.map((url, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <input
+                      type="url"
+                      value={url}
+                      onChange={(e) => updateImageUrl(index, e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      placeholder="https://example.com/image.png"
+                    />
+                    {imageUrls.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeImageUrl(index)}
+                        className="px-3 py-2 text-red-600 hover:text-red-800"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+                
+                <button
+                  type="button"
+                  onClick={addImageUrl}
+                  className="text-primary-600 hover:text-primary-700 text-sm"
+                >
+                  + Add another image URL
+                </button>
+              </div>
             </div>
 
             {/* Error Message */}

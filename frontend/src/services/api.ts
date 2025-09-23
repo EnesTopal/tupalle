@@ -15,12 +15,12 @@ export type { Share, AuthResponse, ApiResponse, CreateShareRequest, LoginRequest
 const getApiBaseUrl = () => {
   if (process.env.NODE_ENV === 'development') {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8080';
+      return 'http://localhost:18089';
     }
-    return 'https://vjxd31fv-8080.euw.devtunnels.ms';
+    return 'https://vjxd31fv-18089.euw.devtunnels.ms';
   }
 
-  return 'http://localhost:8080'; 
+  return 'http://localhost:18089'; 
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -91,6 +91,33 @@ export const shareApi = {
   
   createShare: (data: CreateShareRequest): Promise<Share> =>
     api.post('/shares', data).then(res => res.data),
+  
+  createShareWithImages: (formData: FormData): Promise<Share> =>
+    api.post('/shares/with-images', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then(res => res.data),
+  
+  uploadImage: (file: File): Promise<{ imageUrl: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/shares/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then(res => res.data);
+  },
+  
+  refreshImageUrl: (imageUrl: string): Promise<{ imageUrl: string }> => {
+    const formData = new FormData();
+    formData.append('imageUrl', imageUrl);
+    return api.post('/shares/refresh-image-url', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then(res => res.data);
+  },
   
   likeShare: (id: string): Promise<void> =>
     api.post(`/shares/${id}/like`).then(res => res.data),
