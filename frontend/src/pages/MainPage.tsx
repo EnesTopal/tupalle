@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { shareApi } from '../services/api';
 import { Share, ApiResponse } from '../types';
-import { Search, Heart, User, LogOut, Plus } from 'lucide-react';
+import { Search, Heart, User, LogOut, Plus, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const MainPage: React.FC = () => {
@@ -87,6 +87,13 @@ const MainPage: React.FC = () => {
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Create Share
+              </Link>
+              <Link
+                to="/settings"
+                className="flex items-center text-gray-700 hover:text-primary-600"
+                title="Settings"
+              >
+                <Settings className="h-5 w-5" />
               </Link>
               <Link
                 to="/profile"

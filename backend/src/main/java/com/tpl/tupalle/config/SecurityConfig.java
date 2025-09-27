@@ -37,7 +37,9 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // stateful
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/auth/login", "/auth/register").permitAll()
+                        .requestMatchers("/actuator/health", "/auth/login", "/auth/register", 
+                                        "/auth/verify-email", "/auth/forgot-password", "/auth/reset-password", 
+                                        "/auth/resend-verification", "/auth/google/callback").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

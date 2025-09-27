@@ -19,4 +19,6 @@ public interface ShareLikeRepository extends JpaRepository<ShareLike, UUID> {
     Page<com.tpl.tupalle.entity.Share> findLikedSharesByUserIdExcludingOwnShares(@Param("userId") Long userId, Pageable pageable);
     
     void deleteByShareId(UUID shareId);
+    
+    void deleteByUserId(Long userId);
 }

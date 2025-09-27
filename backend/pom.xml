@@ -96,12 +96,32 @@
 	      <groupId>software.amazon.awssdk</groupId>
 	      <artifactId>s3</artifactId>
 		  <version>2.34.0</version>
-	    </dependency>     
+	    </dependency>
+	    
+	    <!-- AWS SES for email sending -->
+	    <dependency>
+	      <groupId>software.amazon.awssdk</groupId>
+	      <artifactId>ses</artifactId>
+		  <version>2.34.0</version>
+	    </dependency>
+	    
+	    <!-- Spring Security OAuth2 Client for Google OAuth -->
+	    <dependency>
+	        <groupId>org.springframework.boot</groupId>
+	        <artifactId>spring-boot-starter-oauth2-client</artifactId>
+	    </dependency>
     
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>1.5</version>
+        </dependency>
+        
+        <!-- JWT for Google token validation -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.4.0</version>
         </dependency>
 	</dependencies>
 

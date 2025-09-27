@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { userApi, shareApi } from '../services/api';
 import { Share, UserProfile } from '../types';
-import { User, Code, Heart, Edit, Trash2 } from 'lucide-react';
+import { User, Code, Heart, Edit, Trash2, Settings } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ProfilePage: React.FC = () => {
@@ -106,16 +106,25 @@ const ProfilePage: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
-            <Link
-              to="/"
-              className="text-2xl font-bold text-primary-600 hover:text-primary-700"
-            >
-              Tupalle
-            </Link>
-            <div className="ml-6">
-              <h1 className="text-xl font-semibold text-gray-700">Profile</h1>
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Link
+                to="/"
+                className="text-2xl font-bold text-primary-600 hover:text-primary-700"
+              >
+                Tupalle
+              </Link>
+              <div className="ml-6">
+                <h1 className="text-xl font-semibold text-gray-700">Profile</h1>
+              </div>
             </div>
+            <Link
+              to="/settings"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Link>
           </div>
         </div>
       </header>

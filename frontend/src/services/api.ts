@@ -6,11 +6,16 @@ import {
   RegisterRequest, 
   AuthResponse, 
   ApiResponse,
-  UserProfile
+  UserProfile,
+  EmailVerificationRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  UsernameSelectionRequest,
+  GoogleCallbackRequest
 } from '../types';
 
 // Re-export types for convenience
-export type { Share, AuthResponse, ApiResponse, CreateShareRequest, LoginRequest, RegisterRequest, UserProfile };
+export type { Share, AuthResponse, ApiResponse, CreateShareRequest, LoginRequest, RegisterRequest, UserProfile, EmailVerificationRequest, ForgotPasswordRequest, ResetPasswordRequest, UsernameSelectionRequest, GoogleCallbackRequest };
 
 const getApiBaseUrl = () => {
   if (process.env.NODE_ENV === 'development') {
@@ -76,6 +81,96 @@ export const authApi = {
       return response.data;
     } catch (error: any) {
       console.error('Get current user error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  verifyEmail: async (data: EmailVerificationRequest): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/verify-email', data);
+      console.log('Verify email response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Verify email error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/forgot-password', data);
+      console.log('Forgot password response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Forgot password error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/reset-password', data);
+      console.log('Reset password response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Reset password error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  resendVerification: async (email: string): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/resend-verification', null, {
+        params: { email }
+      });
+      console.log('Resend verification response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Resend verification error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  selectUsername: async (data: UsernameSelectionRequest): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/select-username', data);
+      console.log('Select username response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Select username error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  googleCallback: async (data: GoogleCallbackRequest): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/google/callback', data);
+      console.log('Google callback response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Google callback error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  changeUsername: async (data: UsernameSelectionRequest): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/change-username', data);
+      console.log('Change username response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Change username error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  deleteAccount: async (): Promise<AuthResponse> => {
+    try {
+      const response = await api.delete('/auth/delete-account');
+      console.log('Delete account response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Delete account error:', error.response?.data || error.message);
       throw error;
     }
   },

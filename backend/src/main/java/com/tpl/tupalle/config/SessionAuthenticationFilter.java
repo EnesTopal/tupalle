@@ -31,17 +31,20 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        
+
         if (session != null && session.getAttribute("username") != null) {
             String username = (String) session.getAttribute("username");
-            
+            Long userId = (Long) session.getAttribute("userId");
+            Long authProviderId = (Long) session.getAttribute("authProviderId");
+            String[] roles = (String[]) session.getAttribute("roles");
+
             try {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-                // Invalid session, clear it
+                System.out.println("SessionAuthenticationFilter: Invalid username in session: " + username);
                 session.invalidate();
             }
         }

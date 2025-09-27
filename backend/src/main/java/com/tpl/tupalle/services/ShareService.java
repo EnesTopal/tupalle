@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
 import java.util.UUID;
 
@@ -121,8 +122,17 @@ public class ShareService {
 
     @Transactional(readOnly = true)
     public boolean hasUserLiked(UUID shareId, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        
+        Optional <User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            System.out.println("ShareService: User not found for username: " + username);
+            return false;
+        }
+        
+        User user = userOpt.get();
         return likeRepo.existsByShareIdAndUserId(shareId, user.getId());
     }
 

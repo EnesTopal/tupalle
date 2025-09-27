@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
@@ -8,6 +8,9 @@ import CreateSharePage from './pages/CreateSharePage';
 import EditSharePage from './pages/EditSharePage';
 import ShareDetailPage from './pages/ShareDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
+import GoogleCallbackPage from './pages/GoogleCallbackPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import SettingsPage from './pages/SettingsPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -39,9 +42,32 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return !isAuthenticated ? <>{children}</> : <Navigate to="/" />;
 };
 
+// Email verification handler component
+const EmailVerificationHandler: React.FC = () => {
+  const location = useLocation();
+  const { checkAuthStatus } = useAuth();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const verified = urlParams.get('verified');
+    const message = urlParams.get('message');
+
+    if (verified === 'true') {
+      // Email verified successfully, refresh auth status
+      checkAuthStatus();
+      console.log('Email verified successfully:', message);
+    } else if (verified === 'false') {
+      console.error('Email verification failed:', message);
+    }
+  }, [location.search, checkAuthStatus]);
+
+  return null;
+};
+
 const AppContent: React.FC = () => {
   return (
     <Router>
+      <EmailVerificationHandler />
       <Routes>
         <Route 
           path="/login" 
@@ -50,6 +76,14 @@ const AppContent: React.FC = () => {
               <LoginPage />
             </PublicRoute>
           } 
+        />
+        <Route 
+          path="/auth/google/callback" 
+          element={<GoogleCallbackPage />} 
+        />
+        <Route 
+          path="/reset-password" 
+          element={<ResetPasswordPage />} 
         />
         <Route 
           path="/" 
@@ -96,6 +130,14 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <UserProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           } 
         />

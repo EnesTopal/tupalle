@@ -36,13 +36,36 @@ export interface CreateShareRequest {
 }
 
 export interface LoginRequest {
-  username: string;
+  usernameOrEmail: string;
   password: string;
 }
 
 export interface RegisterRequest {
   username: string;
+  email: string;
   password: string;
+}
+
+export interface EmailVerificationRequest {
+  token: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+export interface UsernameSelectionRequest {
+  username: string;
+}
+
+export interface GoogleCallbackRequest {
+  code?: string;
+  idToken?: string;
 }
 
 export interface AuthResponse {
